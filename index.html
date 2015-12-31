@@ -20,6 +20,7 @@
 	<p>Choose an image:</p>
 	<p><input type="file" onchange="process(this)"></p>
 	<p><label><input type="checkbox" id="vertical" onchange="start()"> Vertical</label></p>
+	<p><label><input type="checkbox" id="invert" onchange="start()"> Invert</label></p>
 	<p>Threshold: <input type="range" id="threshold" min="0" max="255" value="80" onchange="this.nextSibling.innerHTML= this.value; start()"><span>80</span></p>
 	<canvas id="b"></canvas>
 
@@ -28,7 +29,7 @@
 var b= document.getElementById('b');
 var c= b.getContext('2d');
 var threshold=0;
-var vertical= false;
+var vertical= false, invert= false;
 
 function process(el){
 	f= el.files[0];
@@ -61,6 +62,7 @@ function start(){
 	c.drawImage(img, 0, 0);
 	threshold= parseInt(document.getElementById('threshold').value);
 	vertical= document.getElementById('vertical').checked;
+	invert= document.getElementById('invert').checked;
 	if (vertical) pixelSortV(); else pixelSortH();
 }
 
@@ -75,7 +77,7 @@ function pixelSortH(){
 		var end= findValueLess(pixels, row, threshold, start);
 		while(start<b.width){
 			var range= pixels.splice(start, end-start);
-			range.sort(simpleMeanSort);
+			range.sort(invert?simpleMeanSortInverted:simpleMeanSort);
 			pixels.splice.apply(pixels, [start,0].concat(range));
 			
 			start= end;
@@ -98,7 +100,7 @@ function pixelSortV(){
 		var end= findValueLess(pixels, col, threshold, start);
 		while(start<b.height){
 			var range= pixels.splice(start, end-start);
-			range.sort(simpleMeanSort);
+			range.sort(invert?simpleMeanSortInverted:simpleMeanSort);
 			pixels.splice.apply(pixels, [start,0].concat(range));
 			
 			start= end;
@@ -122,6 +124,11 @@ function simpleMeanSort(a,b){
 	var aa= (a.r+a.g+a.b)/3;
 	var bb= (b.r+b.g+b.b)/3;
 	return aa<bb?-1: (aa>bb?1:0);
+}
+function simpleMeanSortInverted(a,b){
+	var aa= (a.r+a.g+a.b)/3;
+	var bb= (b.r+b.g+b.b)/3;
+	return aa>bb?-1: (aa<bb?1:0);
 }
 
 function setDataFromPixelsArray(data, pixels){
