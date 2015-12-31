@@ -78,12 +78,12 @@ function getPixelsArray(data){
 function simpleMeanSort(a,b){
 	var aa= (a.r+a.g+a.b)/3;
 	var bb= (b.r+b.g+b.b)/3;
-	return aa<bb?-1: (a>bb?1:0);
+	return aa<bb?-1: (aa>bb?1:0);
 }
 
 function setDataFromPixelsArray(data, pixels){
 	var c;
-	for (var i = 0; i < data.length/4; i++) {
+	for (var i = 0; i < pixels.length; i++) {
 		c= i*4;
 		data[c+0]= pixels[i].r;
 		data[c+1]= pixels[i].g;
