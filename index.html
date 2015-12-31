@@ -18,10 +18,9 @@
 </head>
 <body>
 	<p>Choose an image:</p>
-	<p>
-		<input type="file" onchange="process(this)" style="width: 130px;margin-right:20px">
-		Threshold: <input type="range" id="threshold" min="0" max="255" value="10">
-		<button onclick="start()">SORT!</button>
+	<p><input type="file" onchange="process(this)"></p>
+	<p>Threshold: <input type="range" id="threshold" min="0" max="255" value="10" onchange="this.nextSibling.innerHTML= this.value"><span>10</span></p>
+		<p><button onclick="start()">SORT!</button></p>
 	</p>
 	<canvas id="b"></canvas>
 
