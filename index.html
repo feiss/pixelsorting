@@ -19,6 +19,7 @@
 <body>
 	<p>Choose an image:</p>
 	<p><input type="file" onchange="process(this)"></p>
+	<p><label><input type="checkbox" id="vertical" onchange="start()"> Vertical</label></p>
 	<p>Threshold: <input type="range" id="threshold" min="0" max="255" value="80" onchange="this.nextSibling.innerHTML= this.value; start()"><span>80</span></p>
 	<canvas id="b"></canvas>
 
@@ -27,6 +28,7 @@
 var b= document.getElementById('b');
 var c= b.getContext('2d');
 var threshold=0;
+var vertical= false;
 
 function process(el){
 	f= el.files[0];
@@ -58,10 +60,11 @@ var fileReadComplete = function(e){
 function start(){
 	c.drawImage(img, 0, 0);
 	threshold= parseInt(document.getElementById('threshold').value);
-	pixelSort();
+	vertical= document.getElementById('vertical').checked;
+	if (vertical) pixelSortV(); else pixelSortH();
 }
 
-function pixelSort(){
+function pixelSortH(){
 	for(var row= 0; row< b.height; row++){
 		var imdata= c.getImageData(0, row, b.width, 1);
 		var data= imdata.data;
@@ -84,6 +87,28 @@ function pixelSort(){
 	}
 }
 
+function pixelSortV(){
+	for(var col= 0; col< b.width; col++){
+		var imdata= c.getImageData(col, 0, 1, b.height);
+		var data= imdata.data;
+
+		var pixels= getPixelsArray(data);
+		
+		var start= 0;
+		var end= findValueLess(pixels, col, threshold, start);
+		while(start<b.height){
+			var range= pixels.splice(start, end-start);
+			range.sort(simpleMeanSort);
+			pixels.splice.apply(pixels, [start,0].concat(range));
+			
+			start= end;
+			end= findValueLess(pixels, col, threshold, start+1);
+		}
+			
+		setDataFromPixelsArray(data, pixels);
+		c.putImageData(imdata, col, 0);
+	}
+}
 function getPixelsArray(data){
 	var p= [], c;
 	for (var i = 0; i < data.length/4; i++) {
