@@ -19,9 +19,7 @@
 <body>
 	<p>Choose an image:</p>
 	<p><input type="file" onchange="process(this)"></p>
-	<p>Threshold: <input type="range" id="threshold" min="0" max="255" value="10" onchange="this.nextSibling.innerHTML= this.value"><span>10</span></p>
-		<p><button onclick="start()">SORT!</button></p>
-	</p>
+	<p>Threshold: <input type="range" id="threshold" min="0" max="255" value="10" onchange="this.nextSibling.innerHTML= this.value; start()"><span>10</span></p>
 	<canvas id="b"></canvas>
 
 <script type="text/javascript">
@@ -50,6 +48,7 @@ var fileReadComplete = function(e){
 			b.width= img.width;
 			b.height= img.height;
 			c.drawImage(img, 0, 0);
+			start();
 			}
 		else {
 			setTimeout(arguments.callee, 50);
