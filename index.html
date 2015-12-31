@@ -18,7 +18,11 @@
 </head>
 <body>
 	<p>Choose an image:</p>
-	<p><input type="file" onchange="process(this)"></p>
+	<p>
+		<input type="file" onchange="process(this)" style="width: 130px;margin-right:20px">
+		Threshold: <input type="range" id="threshold" min="0" max="255" value="10">
+		<button onclick="start()">SORT!</button>
+	</p>
 	<canvas id="b"></canvas>
 
 <script type="text/javascript">
@@ -26,6 +30,7 @@
 var b= document.getElementById('b');
 var c= b.getContext('2d');
 var row;
+var threshold=0;
 
 function process(el){
 	f= el.files[0];
@@ -37,22 +42,30 @@ function process(el){
 	reader.onload = fileReadComplete;
 	reader.readAsDataURL(f);
 }
+
+var img= new Image();
 var fileReadComplete = function(e){
-	var img = new Image();
 	img.src = e.target.result;
 	(function(){
 		if (img.complete){
 			b.width= img.width;
 			b.height= img.height;
 			c.drawImage(img, 0, 0);
-			row= 0;
-			requestAnimationFrame(pixelSort);
 			}
 		else {
 			setTimeout(arguments.callee, 50);
 			}
 		})();
 };
+
+function start(){
+	c.drawImage(img, 0, 0);
+	threshold= parseInt(document.getElementById('threshold').value);
+	row= 0;
+	
+	//if not in progress
+	if (row==0) requestAnimationFrame(pixelSort);
+}
 
 function pixelSort(){
 
@@ -62,13 +75,14 @@ function pixelSort(){
 	var pixels= getPixelsArray(data);
 	
 	var start= 0;
-	var end= findValue(pixels, row, {r:0, g:0, b:0}, start);
+	var end= findValueLess(pixels, row, threshold, start);
 	while(start<b.width){
-		start= end;
-		end= findValue(pixels, row, {r:0, g:0, b:0}, start+1);
 		var range= pixels.splice(start, end-start);
 		range.sort(simpleMeanSort);
-		pixels.splice(start,0,range);
+		pixels.splice.apply(pixels, [start,0].concat(range));
+		
+		start= end;
+		end= findValueLess(pixels, row, threshold, start+1);
 	}
 		
 	setDataFromPixelsArray(data, pixels);
@@ -77,6 +91,7 @@ function pixelSort(){
 	
 	row++;
 	if (row<b.height) requestAnimationFrame(pixelSort);
+	else row= 0;
 }
 
 function getPixelsArray(data){
@@ -110,6 +125,16 @@ function findValue(pixels, row, val, start){
 			return i;
 		}
 	}
+	return pixels.length;
+}
+
+function findValueLess(pixels, row, val, start){
+	for (var i=start; i< pixels.length; i++){
+		if ((pixels[i].r+pixels[i].g+pixels[i].b)/3 < val) {
+			return i;
+		}
+	}
+	return pixels.length;
 }
 
 
