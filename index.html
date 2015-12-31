@@ -10,14 +10,34 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Pixel sorting</title>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
 <style>
 	body{
-		font-family: sans-serif;
+		background: #222;
+		font: 14px 'Open Sans', sans-serif;
+		color: #ccc;
+	}
+	input{
+		font: 14px 'Open Sans', sans-serif;
+		background: #333;
+		margin: 0 10px;
+	}
+	a{
+		color: #D6D6D6;
+	}
+	a:hover{
+		color: #fff;
+	}
+	.small{
+		font-size: 0.9em;
+		margin-bottom: 2em;
+		color: #757575;
 	}
 </style>
 </head>
 <body>
-	<p>Choose an image:</p>
+	<p><strong>Pixel Sorting</strong> by <a href="http://feiss.be">feiss.be</a></p>
+	<p class="small">Select an image and play with parameters.<br>No image is uploaded to any server, everything is done locally.</p>
 	<p><input type="file" onchange="process(this)"></p>
 	<p><label><input type="checkbox" id="vertical" onchange="start()"> Vertical</label></p>
 	<p><label><input type="checkbox" id="invert" onchange="start()"> Invert</label></p>
