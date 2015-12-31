@@ -58,10 +58,23 @@ function pixelSort(){
 
 	var imdata= c.getImageData(0, row, b.width, 1);
 	var data= imdata.data;
+
 	var pixels= getPixelsArray(data);
-	pixels.sort(simpleMeanSort);
+	
+	var start= 0;
+	var end= findValue(pixels, row, {r:0, g:0, b:0}, start);
+	while(start<b.width){
+		start= end;
+		end= findValue(pixels, row, {r:0, g:0, b:0}, start+1);
+		var range= pixels.splice(start, end-start);
+		range.sort(simpleMeanSort);
+		pixels.splice(start,0,range);
+	}
+		
 	setDataFromPixelsArray(data, pixels);
+	
 	c.putImageData(imdata, 0, row);
+	
 	row++;
 	if (row<b.height) requestAnimationFrame(pixelSort);
 }
@@ -90,6 +103,15 @@ function setDataFromPixelsArray(data, pixels){
 		data[c+2]= pixels[i].b;
 	}
 }
+
+function findValue(pixels, row, val, start){
+	for (var i=start; i< pixels.length; i++){
+		if (pixels[i].r==val.r && pixels[i].g==val.g && pixels[i].b==val.b) {
+			return i;
+		}
+	}
+}
+
 
 </script>
 
