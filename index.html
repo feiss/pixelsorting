@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<!--
+	Pixel sorting excercise
+	Diego F. Goberna
+	http://feiss.be
+-->
+
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Pixel sorting</title>
+<style>
+	body{
+		font-family: sans-serif;
+	}
+</style>
+</head>
+<body>
+	<p>Choose an image:</p>
+	<p><input type="file" onchange="process(this)"></p>
+	<canvas id="b"></canvas>
+
+<script type="text/javascript">
+	
+var b= document.getElementById('b');
+var c= b.getContext('2d');
+var row;
+
+function process(el){
+	f= el.files[0];
+	if (!f.type.match('image.*')) {
+		return alert('Not an image');
+	  }
+
+	var reader = new FileReader();
+	reader.onload = fileReadComplete;
+	reader.readAsDataURL(f);
+}
+var fileReadComplete = function(e){
+	var img = new Image();
+	img.src = e.target.result;
+	(function(){
+		if (img.complete){
+			b.width= img.width;
+			b.height= img.height;
+			c.drawImage(img, 0, 0);
+			row= 0;
+			requestAnimationFrame(pixelSort);
+			}
+		else {
+			setTimeout(arguments.callee, 50);
+			}
+		})();
+};
+
+function pixelSort(){
+
+	var imdata= c.getImageData(0, row, b.width, 1);
+	var data= imdata.data;
+	var pixels= getPixelsArray(data);
+	pixels.sort(simpleMeanSort);
+	setDataFromPixelsArray(data, pixels);
+	c.putImageData(imdata, 0, row);
+	row++;
+	if (row<b.height) requestAnimationFrame(pixelSort);
+}
+
+function getPixelsArray(data){
+	var p= [], c;
+	for (var i = 0; i < data.length/4; i++) {
+		c= i*4;
+		p.push({r: data[c+0], g: data[c+1], b: data[c+2]});
+	};
+	return p;
+}
+
+function simpleMeanSort(a,b){
+	var aa= (a.r+a.g+a.b)/3;
+	var bb= (b.r+b.g+b.b)/3;
+	return aa<bb?-1: (a>bb?1:0);
+}
+
+function setDataFromPixelsArray(data, pixels){
+	var c;
+	for (var i = 0; i < data.length/4; i++) {
+		c= i*4;
+		data[c+0]= pixels[i].r;
+		data[c+1]= pixels[i].g;
+		data[c+2]= pixels[i].b;
+	}
+}
+
+</script>
+
+</body>
+</html>
