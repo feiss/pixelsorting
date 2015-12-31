@@ -19,14 +19,13 @@
 <body>
 	<p>Choose an image:</p>
 	<p><input type="file" onchange="process(this)"></p>
-	<p>Threshold: <input type="range" id="threshold" min="0" max="255" value="10" onchange="this.nextSibling.innerHTML= this.value; start()"><span>10</span></p>
+	<p>Threshold: <input type="range" id="threshold" min="0" max="255" value="80" onchange="this.nextSibling.innerHTML= this.value; start()"><span>80</span></p>
 	<canvas id="b"></canvas>
 
 <script type="text/javascript">
 	
 var b= document.getElementById('b');
 var c= b.getContext('2d');
-var row;
 var threshold=0;
 
 function process(el){
@@ -59,37 +58,30 @@ var fileReadComplete = function(e){
 function start(){
 	c.drawImage(img, 0, 0);
 	threshold= parseInt(document.getElementById('threshold').value);
-	row= 0;
-	
-	//if not in progress
-	if (row==0) requestAnimationFrame(pixelSort);
+	pixelSort();
 }
 
 function pixelSort(){
+	for(var row= 0; row< b.height; row++){
+		var imdata= c.getImageData(0, row, b.width, 1);
+		var data= imdata.data;
 
-	var imdata= c.getImageData(0, row, b.width, 1);
-	var data= imdata.data;
-
-	var pixels= getPixelsArray(data);
-	
-	var start= 0;
-	var end= findValueLess(pixels, row, threshold, start);
-	while(start<b.width){
-		var range= pixels.splice(start, end-start);
-		range.sort(simpleMeanSort);
-		pixels.splice.apply(pixels, [start,0].concat(range));
+		var pixels= getPixelsArray(data);
 		
-		start= end;
-		end= findValueLess(pixels, row, threshold, start+1);
+		var start= 0;
+		var end= findValueLess(pixels, row, threshold, start);
+		while(start<b.width){
+			var range= pixels.splice(start, end-start);
+			range.sort(simpleMeanSort);
+			pixels.splice.apply(pixels, [start,0].concat(range));
+			
+			start= end;
+			end= findValueLess(pixels, row, threshold, start+1);
+		}
+			
+		setDataFromPixelsArray(data, pixels);
+		c.putImageData(imdata, 0, row);
 	}
-		
-	setDataFromPixelsArray(data, pixels);
-	
-	c.putImageData(imdata, 0, row);
-	
-	row++;
-	if (row<b.height) requestAnimationFrame(pixelSort);
-	else row= 0;
 }
 
 function getPixelsArray(data){
